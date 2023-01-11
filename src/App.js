@@ -9,10 +9,22 @@ import {
   SvgIcon,
   IconButton,
 } from "@mui/material";
-import { getDatabase, ref, set, push, onValue } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  set,
+  push,
+  onValue,
+  remove,
+} from "firebase/database";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 function App() {
+  // input field validation
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [designationError, setDesignationError] = useState("");
+  const [todo, setTodo] = useState([]);
   // UseState
   const [info, setInfo] = useState({
     fName: "",
@@ -20,34 +32,31 @@ function App() {
     deg: "",
   });
 
-  // input field validation
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [designationError, setDesignationError] = useState("");
-  const [todo, setTodo] = useState([]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInfo((prev) => ({
       ...prev,
       [name]: value,
     }));
+    setNameError("");
+    setEmailError("");
+    setDesignationError("");
   };
 
-  // const validationSchema = () => {
-  //   if (!info.fName) {
-  //     setNameError("Please input your Name!");
-  //   } else if (!info.email) {
-  //     setEmailError("Please input your Email!");
-  //   } else if (!info.deg) {
-  //     setDesignationError("Please input your Designation!");
-  //   }
-  // };
+  const validationSchema = () => {
+    if (!info.fName) {
+      setNameError("Please input your Name!");
+    } else if (!info.email) {
+      setEmailError("Please input your Email!");
+    } else if (!info.deg) {
+      setDesignationError("Please input your Designation!");
+    }
+  };
 
   // Write data in database
   const db = getDatabase();
   const handleSubmit = () => {
-    // validationSchema();
+    validationSchema();
     if (info.fName && info.email && info.deg) {
       set(push(ref(db, "users")), {
         fName: info.fName,
@@ -70,11 +79,17 @@ function App() {
     onValue(starCountRef, (snapshot) => {
       let arr = [];
       snapshot.forEach((e) => {
-        arr.push(e.val());
+        arr.push({ ...e.val(), id: e.key });
       });
       setTodo(arr);
     });
   }, []);
+
+  // Delete Data
+
+  const hanleDelete = (id) => {
+    remove(ref(db, "users/" + id));
+  };
 
   return (
     <>
@@ -91,6 +106,7 @@ function App() {
                 margin="normal"
                 fullWidth
                 name="fName"
+                value={info.fName}
               />
               {nameError ? <p className="user-error">{nameError}</p> : ""}
               <TextField
@@ -102,6 +118,7 @@ function App() {
                 margin="normal"
                 fullWidth
                 name="email"
+                value={info.email}
               />
               {emailError ? <p className="user-error">{emailError}</p> : ""}
               <TextField
@@ -113,6 +130,7 @@ function App() {
                 margin="normal"
                 fullWidth
                 name="deg"
+                value={info.deg}
               />
               {designationError ? (
                 <p className="user-error">{designationError}</p>
@@ -133,10 +151,12 @@ function App() {
               <div className="box">
                 {todo.map((item, key) => (
                   <div className="widths" key={key}>
-                    <h4>{item.fName}</h4>
-                    <h5>{item.email}</h5>
-                    <p>{item.deg}</p>
+                    <h4 className="user-name">{item.fName}</h4>
+                    <h5 className="user-email">{item.email}</h5>
+                    <p className="user-deg">{item.deg}</p>
+                    <span className="db-id">{item.id}</span>
                     <IconButton
+                      onClick={() => hanleDelete(item.id)}
                       aria-label="delete"
                       size="large"
                       className="Delete-btn"

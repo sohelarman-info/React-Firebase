@@ -40,3 +40,24 @@
   color: white !important;
   transition: all linear 0.3s;
 }
+
+.db-id {
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 10px;
+  font-size: 10px;
+  margin-right: 10px;
+}
+
+.user-name {
+  text-transform: uppercase;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.user-email {
+  text-transform: lowercase;
+}
+
+.user-deg {
+  text-transform: capitalize;
+}
